@@ -1,71 +1,35 @@
-# Tea Leaf Color-Based Sorting System Using Raspberry Pi
+# Tea Leaf Image Classification System Using Raspberry Pi and Computer Vision
 
 ## Project Overview
 
-This project presents a prototype tea leaf sorting system developed using a Raspberry Pi, OpenCV image processing, an iPhone camera as the image acquisition device, indicator LEDs, and a servo motor sorting mechanism. The system captures tea leaf images in real time, processes them using computer vision techniques, and classifies the tea samples based on their dominant color characteristics.
+This project presents a real-time tea leaf image classification system developed using a Raspberry Pi and an iPhone camera. The system captures images of tea leaves through a wireless camera stream and performs image processing to classify tea samples based on their visual color characteristics.
 
-The primary objective of this prototype is to demonstrate the complete workflow of image acquisition, image processing, classification, and automated sorting. This serves as a foundation for future integration of machine learning and CNN-based tea quality classification.
-
----
-
-## Features
-
-* Real-time image acquisition using an iPhone IP camera
-* Wireless communication between camera and Raspberry Pi
-* OpenCV-based image processing
-* HSV color space segmentation
-* Tea color classification
-* LED indication for detected category
-* Servo motor control for automated sorting
-* Expandable architecture for AI/CNN integration
+The objective of this prototype is to establish a complete image acquisition and processing pipeline for tea leaf analysis, which can later be extended to advanced machine learning and deep learning techniques such as Convolutional Neural Networks (CNNs).
 
 ---
 
-## System Architecture
+## System Description
 
-1. Camera captures tea leaf image.
-2. Raspberry Pi receives image stream.
-3. OpenCV processes the image.
-4. Image is converted from BGR to HSV color space.
-5. Color segmentation is performed using predefined HSV thresholds.
-6. Color percentages are calculated.
-7. Dominant tea category is identified.
-8. Corresponding LED is activated.
-9. Servo motor directs the tea sample into the appropriate collection box.
+The iPhone is configured as a wireless IP camera and streams live video to the Raspberry Pi through a local Wi-Fi network. The Raspberry Pi receives the video stream and processes each image frame in real time using the OpenCV computer vision library.
+
+The captured images undergo several image processing stages including preprocessing, color space conversion, segmentation, feature extraction, and classification. The final output is the identification of the dominant tea leaf category based on color characteristics.
 
 ---
 
 ## Hardware Components
 
-| Component      | Description                  |
-| -------------- | ---------------------------- |
-| Raspberry Pi 4 | Main processing unit         |
-| iPhone Camera  | Wireless image acquisition   |
-| Breadboard     | Circuit prototyping          |
-| Green LED      | Acceptable tea indicator     |
-| Yellow LED     | Medium quality tea indicator |
-| Red LED        | Rejected tea indicator       |
-| Servo Motor    | Sorting mechanism            |
-| 220Ω Resistors | LED current limiting         |
-| Jumper Wires   | Connections                  |
+* Raspberry Pi 4
+* iPhone Camera (IP Camera)
+* Wi-Fi Network Connection
 
 ---
 
-## Software Requirements
+## Software Components
 
-* Raspberry Pi OS
 * Python 3
 * OpenCV
 * NumPy
-* gpiozero
-
-### Install Dependencies
-
-```bash
-sudo apt update
-sudo apt install python3-opencv python3-pip -y
-pip3 install numpy gpiozero
-```
+* Raspberry Pi OS
 
 ---
 
@@ -73,97 +37,79 @@ pip3 install numpy gpiozero
 
 ### 1. Image Acquisition
 
-An iPhone configured as an IP camera streams live video to the Raspberry Pi through a local Wi-Fi network.
+The iPhone camera continuously captures images and transmits them to the Raspberry Pi over a wireless network. This provides a live video stream for real-time processing.
 
-### 2. Color Space Conversion
+### 2. Image Preprocessing
 
-The incoming image is converted from BGR format to HSV (Hue, Saturation, Value) color space.
+Each incoming image frame is resized to a standard resolution to reduce computational complexity and improve processing speed. Preprocessing ensures consistent image dimensions for subsequent operations.
 
-HSV is selected because it provides better color discrimination and is less sensitive to lighting variations compared to RGB.
+### 3. Color Space Conversion
 
-### 3. Color Segmentation
+The captured image is initially represented in the BGR color format used by OpenCV. To improve color analysis, the image is converted to the HSV (Hue, Saturation, Value) color space.
 
-Predefined HSV threshold ranges are applied to isolate different tea color regions.
+HSV is selected because it separates color information from brightness information, making color detection more robust under varying illumination conditions.
 
-The system generates binary masks representing:
+### 4. Color Segmentation
 
-* Brown tea particles
-* Black tea particles
-* Medium-colored tea particles
+Specific HSV threshold ranges are applied to isolate different tea leaf color regions. Binary masks are generated to identify pixels belonging to particular color categories.
 
-### 4. Pixel Analysis
+In each mask:
 
-The number of pixels belonging to each category is calculated.
+* White pixels represent detected tea regions.
+* Black pixels represent background or non-target regions.
 
-The percentage distribution is determined using:
+This segmentation process allows the system to distinguish tea samples based on their dominant visual appearance.
 
-Percentage = (Detected Pixels / Total Tea Pixels) × 100
+### 5. Feature Extraction
 
-### 5. Classification
+After segmentation, the system calculates the number of pixels belonging to each detected color region. These pixel counts are used as features for classification.
 
-The dominant color percentage is selected as the final classification result.
+The percentage contribution of each color category is determined using:
 
-### 6. Actuator Control
+Percentage = (Detected Color Pixels / Total Detected Tea Pixels) × 100
 
-The Raspberry Pi activates:
+### 6. Tea Leaf Classification
 
-* Green LED → Good quality tea
-* Yellow LED → Medium quality tea
-* Red LED → Rejected or over-dried tea
+The dominant color percentage is used to determine the classification result. The tea sample is assigned to the category with the highest detected percentage.
 
-The servo motor rotates to direct tea into the corresponding collection container.
+This approach provides a simple but effective rule-based classification mechanism suitable for prototype development.
 
----
+### 7. Real-Time Visualization
 
-## LED Classification Logic
+The processed image is displayed in real time, allowing visualization of:
 
-| LED        | Classification          |
-| ---------- | ----------------------- |
-| Green LED  | Acceptable Quality Tea  |
-| Yellow LED | Medium Quality Tea      |
-| Red LED    | Rejected/Over-Dried Tea |
+* Original camera feed
+* Segmented color regions
+* Classification results
+* Detected tea leaf areas
+
+This enables immediate verification of the classification performance.
 
 ---
 
-## Future Improvements
+## Current Limitations
 
-The current implementation uses rule-based color thresholding.
-
-Future developments include:
-
-* CNN-based tea classification
-* Tea grade identification
-* Texture analysis
-* Defect detection
-* Impurity detection
-* Industrial camera integration
-* Conveyor belt automation
-* Pneumatic sorting mechanism
-* Real-time production monitoring
+* Classification is based only on color information.
+* Performance may be affected by lighting variations.
+* Background objects with similar colors may influence results.
+* Texture and shape features are not considered.
 
 ---
 
-## Industrial Relevance
+## Future Development
 
-This prototype demonstrates the fundamental operation of industrial tea sorting systems. Industrial implementations typically replace:
+The current HSV-based classification serves as the initial stage of the project. Future work will focus on developing a CNN-based classification model capable of identifying tea varieties and quality grades using multiple image features, including:
 
-| Prototype Component | Industrial Equivalent    |
-| ------------------- | ------------------------ |
-| iPhone Camera       | Industrial Vision Camera |
-| Raspberry Pi        | Edge AI Computer         |
-| HSV Thresholding    | CNN/Deep Learning Models |
-| Servo Motor         | Pneumatic Ejector System |
-| LEDs                | Industrial HMI Interface |
+* Color
+* Texture
+* Shape
+* Surface appearance
+* Defect characteristics
 
----
-
-## Authors
-
-Department of Electrical and Information Engineering
-University of Ruhuna
+The CNN model will be trained using a dedicated tea leaf image dataset to achieve higher classification accuracy and improved robustness under varying environmental conditions.
 
 ---
 
-## License
+## Conclusion
 
-This project is developed for academic and research purposes.
+This project successfully demonstrates a real-time tea leaf image processing system using a Raspberry Pi and an iPhone camera. The implemented pipeline includes image acquisition, preprocessing, HSV color-based segmentation, feature extraction, and classification, providing a strong foundation for future AI-based tea quality assessment systems.
