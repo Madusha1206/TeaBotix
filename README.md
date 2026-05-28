@@ -96,6 +96,7 @@ This enables immediate verification of the classification performance.
 
 ---
 <img src ="./Images/3D _View.jpeg" alt="3D view of proposed solution">
+<c><img src ="./Images/classification_based_on_color.png"></c>
 
 ---
 
