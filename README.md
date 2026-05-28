@@ -95,7 +95,7 @@ This enables immediate verification of the classification performance.
 * Texture and shape features are not considered.
 
 ---
-
+<img src = Images/3D _View.jpeg>
 
 ---
 
