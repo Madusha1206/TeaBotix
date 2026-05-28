@@ -96,20 +96,6 @@ This enables immediate verification of the classification performance.
 
 ---
 
-## Future Development
-
-The current HSV-based classification serves as the initial stage of the project. Future work will focus on developing a CNN-based classification model capable of identifying tea varieties and quality grades using multiple image features, including:
-
-* Color
-* Texture
-* Shape
-* Surface appearance
-* Defect characteristics
-
-The CNN model will be trained using a dedicated tea leaf image dataset to achieve higher classification accuracy and improved robustness under varying environmental conditions.
 
 ---
 
-## Conclusion
-
-This project successfully demonstrates a real-time tea leaf image processing system using a Raspberry Pi and an iPhone camera. The implemented pipeline includes image acquisition, preprocessing, HSV color-based segmentation, feature extraction, and classification, providing a strong foundation for future AI-based tea quality assessment systems.
