@@ -1,103 +1,169 @@
-import cv2
-import numpy as np
-import time
-from gpiozero import LED, AngularServo
+# Tea Leaf Color-Based Sorting System Using Raspberry Pi
 
-url = "http://USERNAME:PASSWORD@192.168.8.105:8081/video"
+## Project Overview
 
-green_led = LED(17)
-brown_led = LED(27)
-black_led = LED(22)
+This project presents a prototype tea leaf sorting system developed using a Raspberry Pi, OpenCV image processing, an iPhone camera as the image acquisition device, indicator LEDs, and a servo motor sorting mechanism. The system captures tea leaf images in real time, processes them using computer vision techniques, and classifies the tea samples based on their dominant color characteristics.
 
-servo = AngularServo(18, min_angle=0, max_angle=180)
+The primary objective of this prototype is to demonstrate the complete workflow of image acquisition, image processing, classification, and automated sorting. This serves as a foundation for future integration of machine learning and CNN-based tea quality classification.
 
-GREEN_POS = 30
-BROWN_POS = 90
-BLACK_POS = 150
+---
 
-cap = cv2.VideoCapture(url)
+## Features
 
-if not cap.isOpened():
-    print("Camera not opened")
-    exit()
+* Real-time image acquisition using an iPhone IP camera
+* Wireless communication between camera and Raspberry Pi
+* OpenCV-based image processing
+* HSV color space segmentation
+* Tea color classification
+* LED indication for detected category
+* Servo motor control for automated sorting
+* Expandable architecture for AI/CNN integration
 
-def all_leds_off():
-    green_led.off()
-    brown_led.off()
-    black_led.off()
+---
 
-def sort_leaf(color):
-    all_leds_off()
+## System Architecture
 
-    if color == "GREEN":
-        green_led.on()
-        servo.angle = GREEN_POS
-        print("GREEN leaf → Box 1")
+1. Camera captures tea leaf image.
+2. Raspberry Pi receives image stream.
+3. OpenCV processes the image.
+4. Image is converted from BGR to HSV color space.
+5. Color segmentation is performed using predefined HSV thresholds.
+6. Color percentages are calculated.
+7. Dominant tea category is identified.
+8. Corresponding LED is activated.
+9. Servo motor directs the tea sample into the appropriate collection box.
 
-    elif color == "BROWN":
-        brown_led.on()
-        servo.angle = BROWN_POS
-        print("BROWN leaf → Box 2")
+---
 
-    elif color == "BLACK":
-        black_led.on()
-        servo.angle = BLACK_POS
-        print("BLACK leaf → Box 3")
+## Hardware Components
 
-    time.sleep(1.5)
-    all_leds_off()
-    servo.angle = 90
+| Component      | Description                  |
+| -------------- | ---------------------------- |
+| Raspberry Pi 4 | Main processing unit         |
+| iPhone Camera  | Wireless image acquisition   |
+| Breadboard     | Circuit prototyping          |
+| Green LED      | Acceptable tea indicator     |
+| Yellow LED     | Medium quality tea indicator |
+| Red LED        | Rejected tea indicator       |
+| Servo Motor    | Sorting mechanism            |
+| 220Ω Resistors | LED current limiting         |
+| Jumper Wires   | Connections                  |
 
-last_sort_time = 0
-delay_between_sorts = 3
+---
 
-while True:
-    ret, frame = cap.read()
+## Software Requirements
 
-    if not ret:
-        print("Frame not received")
-        break
+* Raspberry Pi OS
+* Python 3
+* OpenCV
+* NumPy
+* gpiozero
 
-    frame = cv2.resize(frame, (640, 480))
-    hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+### Install Dependencies
 
-    green_mask = cv2.inRange(hsv, np.array([35, 40, 40]), np.array([85, 255, 255]))
-    brown_mask = cv2.inRange(hsv, np.array([5, 50, 20]), np.array([25, 255, 180]))
-    black_mask = cv2.inRange(hsv, np.array([0, 0, 0]), np.array([180, 255, 50]))
+```bash
+sudo apt update
+sudo apt install python3-opencv python3-pip -y
+pip3 install numpy gpiozero
+```
 
-    green_pixels = cv2.countNonZero(green_mask)
-    brown_pixels = cv2.countNonZero(brown_mask)
-    black_pixels = cv2.countNonZero(black_mask)
+---
 
-    total = green_pixels + brown_pixels + black_pixels
+## Image Processing Methodology
 
-    if total > 2000:
-        green_percent = green_pixels / total * 100
-        brown_percent = brown_pixels / total * 100
-        black_percent = black_pixels / total * 100
+### 1. Image Acquisition
 
-        if green_percent > brown_percent and green_percent > black_percent:
-            detected = "GREEN"
-        elif brown_percent > black_percent:
-            detected = "BROWN"
-        else:
-            detected = "BLACK"
+An iPhone configured as an IP camera streams live video to the Raspberry Pi through a local Wi-Fi network.
 
-        cv2.putText(frame, detected, (20, 40),
-                    cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+### 2. Color Space Conversion
 
-        current_time = time.time()
+The incoming image is converted from BGR format to HSV (Hue, Saturation, Value) color space.
 
-        if current_time - last_sort_time > delay_between_sorts:
-            sort_leaf(detected)
-            last_sort_time = current_time
+HSV is selected because it provides better color discrimination and is less sensitive to lighting variations compared to RGB.
 
-    cv2.imshow("Tea Leaf Sorting", frame)
+### 3. Color Segmentation
 
-    if cv2.waitKey(1) & 0xFF == ord("q"):
-        break
+Predefined HSV threshold ranges are applied to isolate different tea color regions.
 
-cap.release()
-cv2.destroyAllWindows()
-all_leds_off()
-servo.angle = 90
+The system generates binary masks representing:
+
+* Brown tea particles
+* Black tea particles
+* Medium-colored tea particles
+
+### 4. Pixel Analysis
+
+The number of pixels belonging to each category is calculated.
+
+The percentage distribution is determined using:
+
+Percentage = (Detected Pixels / Total Tea Pixels) × 100
+
+### 5. Classification
+
+The dominant color percentage is selected as the final classification result.
+
+### 6. Actuator Control
+
+The Raspberry Pi activates:
+
+* Green LED → Good quality tea
+* Yellow LED → Medium quality tea
+* Red LED → Rejected or over-dried tea
+
+The servo motor rotates to direct tea into the corresponding collection container.
+
+---
+
+## LED Classification Logic
+
+| LED        | Classification          |
+| ---------- | ----------------------- |
+| Green LED  | Acceptable Quality Tea  |
+| Yellow LED | Medium Quality Tea      |
+| Red LED    | Rejected/Over-Dried Tea |
+
+---
+
+## Future Improvements
+
+The current implementation uses rule-based color thresholding.
+
+Future developments include:
+
+* CNN-based tea classification
+* Tea grade identification
+* Texture analysis
+* Defect detection
+* Impurity detection
+* Industrial camera integration
+* Conveyor belt automation
+* Pneumatic sorting mechanism
+* Real-time production monitoring
+
+---
+
+## Industrial Relevance
+
+This prototype demonstrates the fundamental operation of industrial tea sorting systems. Industrial implementations typically replace:
+
+| Prototype Component | Industrial Equivalent    |
+| ------------------- | ------------------------ |
+| iPhone Camera       | Industrial Vision Camera |
+| Raspberry Pi        | Edge AI Computer         |
+| HSV Thresholding    | CNN/Deep Learning Models |
+| Servo Motor         | Pneumatic Ejector System |
+| LEDs                | Industrial HMI Interface |
+
+---
+
+## Authors
+
+Department of Electrical and Information Engineering
+University of Ruhuna
+
+---
+
+## License
+
+This project is developed for academic and research purposes.
