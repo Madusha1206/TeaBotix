@@ -16,11 +16,11 @@ The captured images undergo several image processing stages including preprocess
 
 ---
 
-## Hardware Components
+## Hardware Components used
 
 * Raspberry Pi 4
-* iPhone Camera (IP Camera)
-* Wi-Fi Network Connection
+* IP Camera
+
 
 ---
 
